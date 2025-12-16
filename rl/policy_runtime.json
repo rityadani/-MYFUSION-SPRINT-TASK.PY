@@ -1,0 +1,39 @@
+{
+  "q_table": {
+    "test_state_restart": 1.5,
+    "sample_backend_stage_healthy_err0_scale_up": 3.940399,
+    "sample_backend_stage_healthy_err0_deploy": 2.9701000000000004,
+    "sample_backend_stage_healthy_err0_scale_down": 2.9701000000000004,
+    "sample_frontend_stage_healthy_err0_scale_down": 2.9701000000000004,
+    "api_service_dev_healthy_err0_stop": 1.9900000000000002,
+    "api_service_dev_healthy_err0_restart": 2.9701000000000004,
+    "sample_frontend_dev_healthy_err0_restart": 4.900995010000001,
+    "api_service_prod_healthy_err0_scale_down": 4.900995010000001,
+    "sample_backend_stage_healthy_err0_stop": 1.0,
+    "sample_frontend_stage_healthy_err0_scale_up": 2.9701000000000004,
+    "api_service_dev_healthy_err0_scale_up": 2.9701000000000004,
+    "sample_backend_stage_healthy_err0_restart": 1.0,
+    "sample_frontend_stage_healthy_err0_stop": 1.1791,
+    "sample_frontend_stage_healthy_err0_deploy": 1.267309,
+    "api_service_dev_healthy_err0_scale_down": 2.9701000000000004,
+    "sample_frontend_stage_healthy_err0_restart": 2.9701000000000004,
+    "api_service_dev_healthy_err0_deploy": 2.9701000000000004,
+    "sample_backend_stage_not_deployed_err100_deploy": 1.0,
+    "sample_backend_stage_not_deployed_err100_restart": 1.0,
+    "sample_backend_stage_healthy_err5_restart": 1.0,
+    "sample_backend_stage_healthy_err9_scale_up": 1.0,
+    "sample_frontend_stage_not_deployed_err100_scale_up": 2.9701000000000004,
+    "api_service_dev_not_deployed_err100_deploy": 1.0,
+    "api_service_dev_healthy_err10_scale_up": 1.0,
+    "api_service_dev_healthy_err4_restart": 1.0,
+    "sample_backend_stage_unknown_err0_restart": 1.0,
+    "sample_backend_stage_unknown_err0_stop": 1.09,
+    "sample_backend_stage_unknown_err0_scale_up": 1.9900000000000002
+  },
+  "metadata": {
+    "alpha": 0.1,
+    "gamma": 0.9,
+    "epsilon": 0.2,
+    "last_updated": "2025-12-16T12:49:55.046218"
+  }
+}

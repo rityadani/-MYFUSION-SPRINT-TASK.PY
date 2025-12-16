@@ -1,0 +1,14 @@
+{
+  "name": "sample_backend",
+  "type": "backend",
+  "scaling": {
+    "enabled": true,
+    "min_workers": 1,
+    "max_workers": 3
+  },
+  "health_check": {
+    "enabled": true,
+    "endpoint": "/health"
+  },
+  "custom_actions": []
+}
