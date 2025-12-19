@@ -27,11 +27,43 @@ class UniversalRLController:
                 writer.writerow(['timestamp', 'app_name', 'env', 'state', 'action', 'reward', 'q_value'])
     
     def load_app_spec(self, app_name):
+        """Load and validate app specification"""
         spec_path = f"{self.specs_dir}/{app_name}.json"
         if not os.path.exists(spec_path):
             raise FileNotFoundError(f"App spec not found: {spec_path}")
+        
         with open(spec_path, 'r') as f:
-            return json.load(f)
+            spec = json.load(f)
+        
+        # Validate app spec schema
+        if not self._validate_app_spec(spec):
+            raise ValueError(f"Invalid app spec for {app_name}: Schema validation failed")
+        
+        return spec
+    
+    def _validate_app_spec(self, spec):
+        """Validate app spec against required schema"""
+        required_fields = ['name', 'type']
+        for field in required_fields:
+            if field not in spec:
+                return False
+        
+        # Validate scaling configuration
+        if 'scaling' in spec:
+            scaling = spec['scaling']
+            if 'max_workers' in scaling and scaling['max_workers'] > 10:
+                return False  # Safety constraint
+            if 'min_workers' in scaling and scaling['min_workers'] < 1:
+                return False
+        
+        # Validate custom actions
+        if 'custom_actions' in spec:
+            allowed_actions = ['deploy', 'stop', 'restart', 'scale_up', 'scale_down', 'rollback']
+            for action in spec['custom_actions']:
+                if action not in allowed_actions:
+                    return False
+        
+        return True
     
     def get_state(self, app_name, env):
         from rl.app_state_mapper import extract_state
@@ -67,24 +99,49 @@ class UniversalRLController:
             return {"status": "unknown_action"}
     
     def compute_reward(self, pre_state, post_state):
+        """Advanced reward function with latency gradients and long-term penalties"""
         reward = 0.0
         
+        # Status transition rewards
         if post_state.get('status') == 'healthy' and pre_state.get('status') != 'healthy':
-            reward += 10.0
-        if post_state.get('error_rate', 1.0) < pre_state.get('error_rate', 1.0):
-            reward += 5.0
-        if post_state.get('response_time', 1000) < pre_state.get('response_time', 1000):
-            reward += 3.0
-        
-        if post_state.get('status') == 'failed':
-            reward -= 10.0
-        if post_state.get('error_rate', 0) > 0.5:
+            reward += 15.0
+        elif post_state.get('status') == 'failed':
+            reward -= 20.0
+        elif post_state.get('status') == 'degraded':
             reward -= 5.0
         
-        if post_state.get('status') == 'healthy' and pre_state.get('status') == 'healthy':
-            reward += 1.0
+        # Latency gradient rewards (fine-grained)
+        pre_latency = pre_state.get('response_time', 1000)
+        post_latency = post_state.get('response_time', 1000)
+        latency_improvement = (pre_latency - post_latency) / pre_latency if pre_latency > 0 else 0
+        reward += latency_improvement * 10.0
         
-        return reward
+        # Partial degradation penalties
+        pre_error = pre_state.get('error_rate', 0.0)
+        post_error = post_state.get('error_rate', 0.0)
+        error_delta = post_error - pre_error
+        if error_delta > 0:
+            reward -= error_delta * 25.0
+        else:
+            reward += abs(error_delta) * 15.0
+        
+        # Long-term stability penalties
+        if post_state.get('status') == 'healthy':
+            uptime = post_state.get('uptime', 0)
+            if uptime < 300:
+                reward -= 3.0
+            elif uptime > 3600:
+                reward += 2.0
+        
+        # Resource efficiency rewards
+        cpu_usage = post_state.get('cpu_usage', 0.5)
+        memory_usage = post_state.get('memory_usage', 0.5)
+        if cpu_usage < 0.3 and memory_usage < 0.4:
+            reward += 1.0
+        elif cpu_usage > 0.8 or memory_usage > 0.8:
+            reward -= 2.0
+        
+        return round(reward, 2)
     
     def update_rl_table(self, state, action, reward, next_state, valid_next_actions):
         current_q = self.q_table.get((state, action), 0.0)

@@ -1,0 +1,17 @@
+{
+  "version": "1.0",
+  "enforcement_level": "STRICT",
+  "constraints": {
+    "max_workers_global": 10,
+    "max_workers_per_app": 3,
+    "min_uptime_before_action": 30,
+    "max_actions_per_minute": 5,
+    "forbidden_prod_actions": ["stop"],
+    "required_approval_actions": ["scale_up"]
+  },
+  "schema_validation": {
+    "required_app_spec_fields": ["app_name", "actions", "states"],
+    "valid_action_types": ["deploy", "stop", "restart", "scale_up", "scale_down"],
+    "valid_state_types": ["healthy", "failed", "degraded", "starting"]
+  }
+}
